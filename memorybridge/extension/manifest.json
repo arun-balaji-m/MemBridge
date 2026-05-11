@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "MemoryBridge",
+  "version": "1.0.0",
+  "description": "Extract chat conversations from Claude.ai and ChatGPT, package memories, and upload to Google Drive.",
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "identity",
+    "scripting",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://chat.openai.com/*",
+    "http://localhost:8765/*"
+  ],
+
+  "oauth2": {
+    "client_id": "1090181680939-4o3ceu48vuropja73ukormjiv0sdo9dp.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file"
+    ]
+  },
+
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "MemoryBridge",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "content/scraper.js",
+        "content/classifier.js",
+        "content/chunker.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

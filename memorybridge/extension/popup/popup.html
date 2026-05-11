@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MemoryBridge</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <span class="logo-icon">🧠</span>
+      <span class="logo-text">MemoryBridge</span>
+    </div>
+    <p class="tagline">Capture · Store · Retrieve</p>
+  </header>
+
+  <!-- Input section -->
+  <section class="input-section">
+    <label for="chat-url">Chat URL</label>
+    <div class="url-row">
+      <input
+        type="url"
+        id="chat-url"
+        placeholder="https://claude.ai/chat/... or https://chat.openai.com/..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+    <button id="extract-btn" class="btn-primary">Extract Memory</button>
+  </section>
+
+  <!-- Progress section (hidden until extraction starts) -->
+  <section id="progress-section" class="hidden">
+    <div class="steps">
+      <div class="step" id="step-1" data-step="1">
+        <span class="step-icon"></span>
+        <span class="step-label">Scraping chat…</span>
+      </div>
+      <div class="step" id="step-2" data-step="2">
+        <span class="step-icon"></span>
+        <span class="step-label">Classifying chunks…</span>
+      </div>
+      <div class="step" id="step-3" data-step="3">
+        <span class="step-icon"></span>
+        <span class="step-label">Generating embeddings…</span>
+      </div>
+      <div class="step" id="step-4" data-step="4">
+        <span class="step-icon"></span>
+        <span class="step-label">Creating memory package…</span>
+      </div>
+      <div class="step" id="step-5" data-step="5">
+        <span class="step-icon"></span>
+        <span class="step-label">Uploading to Google Drive…</span>
+      </div>
+      <div class="step" id="step-6" data-step="6">
+        <span class="step-icon"></span>
+        <span class="step-label">Done!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result section (hidden until done) -->
+  <section id="result-section" class="hidden">
+    <div class="result-card">
+      <p class="result-label">Your session key</p>
+      <div class="key-row">
+        <span id="session-key" class="session-key">—</span>
+        <button id="copy-btn" class="btn-copy" title="Copy key">⎘ Copy</button>
+      </div>
+      <p class="result-hint">Save this key to retrieve your memory later.</p>
+    </div>
+  </section>
+
+  <!-- Error banner (hidden by default) -->
+  <div id="error-banner" class="error-banner hidden">
+    <span id="error-message"></span>
+  </div>
+
+  <!-- History section -->
+  <section id="history-section">
+    <h3 class="history-title">Previous Sessions</h3>
+    <ul id="history-list" class="history-list">
+      <li class="history-empty">No sessions yet.</li>
+    </ul>
+  </section>
+
+  <script src="popup.js"></script>
+</body>
+</html>
