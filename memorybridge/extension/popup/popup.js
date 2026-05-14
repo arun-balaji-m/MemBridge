@@ -168,7 +168,7 @@ const promptSection  = document.getElementById('prompt-section');
 const promptText     = document.getElementById('prompt-text');
 const copyPromptBtn  = document.getElementById('copy-prompt-btn');
 
-const API_BASE = 'https://your-app.railway.app'; // ← update after Railway deploy
+const API_BASE = 'https://membridge-production.up.railway.app'; // ← update after Railway deploy
 
 promptBtn.addEventListener('click', async () => {
   const key = sessionKeyEl.textContent;

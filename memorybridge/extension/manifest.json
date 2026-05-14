@@ -15,7 +15,7 @@
   "host_permissions": [
     "https://claude.ai/*",
     "https://chat.openai.com/*",
-    "http://localhost:8765/*"
+    "https://membridge-production.up.railway.app/*"
   ],
 
   "oauth2": {

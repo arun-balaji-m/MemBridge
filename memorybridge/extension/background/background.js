@@ -15,7 +15,7 @@
 import { getAuthToken, ensureMemoryBridgeFolder, uploadPackage } from "./drive.js";
 import { generateSessionKey, saveSession, getAllSessions } from "./session.js";
 
-const BACKEND = "https://your-app.railway.app"; // ← update after Railway deploy
+const BACKEND = "https://membridge-production.up.railway.app"; // ← update after Railway deploy
 
 // ── Progress reporting ─────────────────────────────────────────────────────
 
