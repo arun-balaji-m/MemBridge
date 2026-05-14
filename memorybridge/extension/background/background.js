@@ -15,7 +15,7 @@
 import { getAuthToken, ensureMemoryBridgeFolder, uploadPackage } from "./drive.js";
 import { generateSessionKey, saveSession, getAllSessions } from "./session.js";
 
-const BACKEND = "http://localhost:8765";
+const BACKEND = "https://your-app.railway.app"; // ← update after Railway deploy
 
 // ── Progress reporting ─────────────────────────────────────────────────────
 

@@ -161,7 +161,58 @@ extractBtn.addEventListener("click", async () => {
     extractBtn.disabled = false;
   }
 });
+// ── Get LLM Prompt button ───────────────────────────────────────────────────
 
+const promptBtn      = document.getElementById('prompt-btn');
+const promptSection  = document.getElementById('prompt-section');
+const promptText     = document.getElementById('prompt-text');
+const copyPromptBtn  = document.getElementById('copy-prompt-btn');
+
+const API_BASE = 'https://your-app.railway.app'; // ← update after Railway deploy
+
+promptBtn.addEventListener('click', async () => {
+  const key = sessionKeyEl.textContent;
+  if (!key || key === '—') return;
+
+  promptBtn.disabled = true;
+  promptBtn.textContent = 'Fetching…';
+
+  try {
+    // Get a fresh Drive token from Chrome identity
+    const token = await new Promise((resolve, reject) => {
+      chrome.identity.getAuthToken({ interactive: false }, (t) => {
+        if (chrome.runtime.lastError || !t) reject(new Error('Token unavailable'));
+        else resolve(t);
+      });
+    });
+
+    const res = await fetch(`${API_BASE}/prompt?key=${key}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail?.message ?? `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    promptText.value = data.prompt;
+    promptSection.classList.remove('hidden');
+    promptBtn.textContent = 'Refresh Prompt';
+  } catch (err) {
+    showError('Could not fetch LLM prompt: ' + err.message);
+    promptBtn.textContent = 'Get LLM Prompt';
+  } finally {
+    promptBtn.disabled = false;
+  }
+});
+
+copyPromptBtn.addEventListener('click', async () => {
+  if (!promptText.value) return;
+  await navigator.clipboard.writeText(promptText.value);
+  copyPromptBtn.textContent = '✓ Copied!';
+  setTimeout(() => { copyPromptBtn.textContent = '⎘ Copy'; }, 1800);
+});
 // ── Copy button ────────────────────────────────────────────────────────────
 
 copyBtn.addEventListener("click", async () => {

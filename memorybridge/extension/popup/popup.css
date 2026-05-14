@@ -270,5 +270,57 @@ input[type="url"]:focus { border-color: var(--primary); }
 
 .history-empty { font-size: 12px; color: var(--text-muted); padding: 4px 0; }
 
+/* ── Prompt button ────────────────────────────────────────────────────────── */
+.btn-prompt {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.btn-prompt:hover { background: rgba(108,99,255,0.15); }
+.btn-prompt:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Prompt card ───────────────────────────────────────────────────────────── */
+.prompt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.prompt-text {
+  width: 100%;
+  height: 130px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  padding: 8px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+}
+
 /* ── Utilities ─────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }

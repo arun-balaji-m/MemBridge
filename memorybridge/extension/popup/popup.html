@@ -70,6 +70,18 @@
         <button id="copy-btn" class="btn-copy" title="Copy key">⎘ Copy</button>
       </div>
       <p class="result-hint">Save this key to retrieve your memory later.</p>
+      <button id="prompt-btn" class="btn-prompt">Get LLM Prompt</button>
+    </div>
+  </section>
+
+  <!-- Prompt modal (hidden until fetched) -->
+  <section id="prompt-section" class="hidden">
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <span>LLM Prompt</span>
+        <button id="copy-prompt-btn" class="btn-copy">⎘ Copy</button>
+      </div>
+      <textarea id="prompt-text" class="prompt-text" readonly></textarea>
     </div>
   </section>
 
