@@ -20,26 +20,27 @@ My full project context is stored in a MemoryBridge memory system.
 API Base: {api_base}
 Session Key: {key}
 
-Before answering anything about this project, you MUST retrieve context by calling these endpoints:
+Retrieve context before answering anything about this project:
 
-1. GET {api_base}/index?key={key}
-   → Lists all available topics. Read them and decide which are relevant.
+STEP 1 — List topics (GET, works everywhere):
+  {api_base}/index?key={key}
 
-2. POST {api_base}/query
-   Content-Type: application/json
-   Body: {{"key": "{key}", "question": "<your relevant question>", "top_k": 3}}
-   → Returns the most relevant context chunks. Use them as your working memory.
+STEP 2 — Fetch relevant chunks. Use whichever method your environment supports:
 
-3. Answer using the retrieved chunks as context.
+  Option A — GET (Claude, ChatGPT browsing, any browser):
+    {api_base}/query?key={key}&question=<url-encoded-question>&top_k=3
+    Example: {api_base}/query?key={key}&question=how+does+authentication+work&top_k=3
 
-4. Repeat step 2 as new topics arise in the conversation.
+  Option B — POST with JSON body (ChatGPT Custom GPT Actions, API clients):
+    POST {api_base}/query
+    Content-Type: application/json
+    {{"key": "{key}", "question": "<your question>", "top_k": 3}}
 
-5. GET {api_base}/status?key={key}
-   → Check retrieval progress at any time.
+STEP 3 — Answer using the retrieved chunks.
+STEP 4 — Repeat Step 2 as new topics arise.
 
-No authentication headers are needed.
-
-Start now: call GET {api_base}/index?key={key} and summarize what project we are working on and where we left off.\
+No authentication needed for any request.
+Start now with Step 1 and summarize the project and where we left off.\
 """
 
 
