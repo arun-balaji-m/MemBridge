@@ -53,7 +53,7 @@ def cache_set(
     metadata: dict,
     drive_file_id: str,
     access_token: str,
-    ttl: float = 3600.0,
+    ttl: float = 43200.0,  # 12 hours default
 ) -> _CacheEntry:
     entry = _CacheEntry(
         session_key=key,

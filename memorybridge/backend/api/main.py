@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     log.info("Embedding model loaded.")
 
     # Start cache eviction background task
-    ttl = float(os.getenv("CACHE_TTL_SECONDS", "3600"))
+    ttl = float(os.getenv("CACHE_TTL_SECONDS", "43200"))  # 12 hours default
 
     eviction_task = asyncio.create_task(eviction_loop(ttl=ttl))
     app_state["eviction_task"] = eviction_task
@@ -101,7 +101,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 

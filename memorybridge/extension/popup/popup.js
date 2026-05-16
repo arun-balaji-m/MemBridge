@@ -54,6 +54,40 @@ function formatDate(iso) {
 
 // ── Session history ─────────────────────────────────────────────────────────
 
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('session-toast');
+  toast.textContent = msg;
+  toast.className = 'session-toast' + (isError ? ' toast-error' : ' toast-ok');
+  setTimeout(() => { toast.className = 'session-toast hidden'; }, 3000);
+}
+
+async function warmSession(key) {
+  try {
+    const token = await new Promise((resolve, reject) => {
+      chrome.identity.getAuthToken({ interactive: false }, (t) => {
+        if (chrome.runtime.lastError || !t) reject(new Error('Token unavailable'));
+        else resolve(t);
+      });
+    });
+    const res = await fetch(`${API_BASE}/prompt?key=${key}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    showToast(`✓ Session ${key} warmed — ready for LLM queries`);
+  } catch (e) {
+    showToast(`✗ Could not warm session: ${e.message}`, true);
+  }
+}
+
+async function endSession(key) {
+  try {
+    await fetch(`${API_BASE}/session?key=${key}`, { method: 'DELETE' });
+    showToast(`Session ${key} ended`);
+  } catch (e) {
+    showToast(`✗ Could not end session: ${e.message}`, true);
+  }
+}
+
 async function loadHistory() {
   const res = await chrome.runtime.sendMessage({ action: "getSessions" });
   const sessions = res?.sessions ?? {};
@@ -74,7 +108,13 @@ async function loadHistory() {
       <span class="h-key">${s.key}</span>
       <span class="h-project" title="${s.source_url}">${s.project}</span>
       <span class="h-date">${formatDate(s.created_at)}</span>
+      <div class="h-actions">
+        <button class="btn-warm" title="Reload session into server cache">🔄 Warm</button>
+        <button class="btn-end" title="Evict session from server cache">⏹ End</button>
+      </div>
     `;
+    li.querySelector('.btn-warm').addEventListener('click', () => warmSession(s.key));
+    li.querySelector('.btn-end').addEventListener('click', () => endSession(s.key));
     historyList.appendChild(li);
   }
 }

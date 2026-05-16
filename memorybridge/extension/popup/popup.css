@@ -268,6 +268,26 @@ input[type="url"]:focus { border-color: var(--primary); }
 
 .history-item .h-date { font-size: 10px; color: var(--text-muted); }
 
+.history-item .h-actions { display: flex; gap: 4px; margin-top: 4px; }
+
+.btn-warm, .btn-end {
+  font-size: 10px; padding: 2px 7px; border-radius: 4px; cursor: pointer;
+  border: 1px solid; font-weight: 600; transition: opacity 0.15s;
+}
+.btn-warm { background: rgba(108,99,255,0.12); border-color: var(--primary); color: var(--primary); }
+.btn-end  { background: rgba(220,53,69,0.08); border-color: #dc3545; color: #dc3545; }
+.btn-warm:hover { background: rgba(108,99,255,0.25); }
+.btn-end:hover  { background: rgba(220,53,69,0.18); }
+
+.session-toast {
+  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+  padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; z-index: 999; transition: opacity 0.2s;
+}
+.session-toast.hidden { display: none; }
+.session-toast.toast-ok    { background: #1a7f4b; color: #fff; }
+.session-toast.toast-error { background: #dc3545; color: #fff; }
+
 .history-empty { font-size: 12px; color: var(--text-muted); padding: 4px 0; }
 
 /* ── Prompt button ────────────────────────────────────────────────────────── */

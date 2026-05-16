@@ -1,7 +1,7 @@
 """
 routers/status.py — MemoryBridge Phase 2
-GET /status?key=<session_key>
-Returns retrieval progress.
+GET    /status?key=<session_key>  — retrieval progress
+DELETE /session?key=<session_key> — evict session from cache
 """
 
 import asyncio
@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from api.services.session_service import resolve_session
 from api.utils.vectorstore import get_db, get_counts
+from api.utils.cache import cache_invalidate
 from api.models.response_models import StatusResponse
 
 router = APIRouter()
@@ -48,6 +49,13 @@ async def get_status(
         percent_complete=pct,
         status=status,
     )
+
+
+@router.delete("/session")
+async def end_session(key: str):
+    """Evict a session from the server cache. Called by the extension 'End Session' button."""
+    cache_invalidate(key)
+    return {"ok": True, "message": f"Session '{key}' removed from cache."}
 
 
 def _extract_token(authorization: Optional[str]) -> Optional[str]:
