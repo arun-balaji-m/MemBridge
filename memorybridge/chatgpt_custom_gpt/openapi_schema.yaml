@@ -1,0 +1,165 @@
+openapi: 3.1.0
+info:
+  title: MemoryBridge API
+  description: >
+    Retrieves saved project context chunks from MemoryBridge.
+    Use /index to list topics, then /query to retrieve relevant chunks
+    by semantic search. No authentication required.
+  version: 1.0.0
+servers:
+  - url: https://membridge-production.up.railway.app
+
+paths:
+  /index:
+    get:
+      operationId: getIndex
+      summary: List all saved topics for a session
+      description: >
+        Returns a list of all topic titles and summaries stored under this
+        session key. Call this first to understand what context is available.
+      parameters:
+        - name: key
+          in: query
+          required: true
+          description: The session key from the MemoryBridge extension.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project:
+                    type: string
+                  session_key:
+                    type: string
+                  topics:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        category:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        retrieved:
+                          type: boolean
+        "401":
+          description: Session not warmed — user needs to open the extension first.
+        "404":
+          description: Session key not found.
+
+  /query:
+    post:
+      operationId: queryMemory
+      summary: Retrieve the most relevant context chunks by question
+      description: >
+        Semantically searches the saved project context and returns the top
+        matching chunks. Call this with a question related to the current topic
+        to get relevant detail, code, and explanations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - question
+              properties:
+                key:
+                  type: string
+                  description: The session key from the MemoryBridge extension.
+                question:
+                  type: string
+                  description: >
+                    A natural language question about the project.
+                    E.g. "How does the authentication flow work?"
+                top_k:
+                  type: integer
+                  description: Number of chunks to return (1–10). Default is 3.
+                  default: 3
+      responses:
+        "200":
+          description: Matching context chunks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chunks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        detail:
+                          type: string
+                        code:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        category:
+                          type: string
+                        similarity_score:
+                          type: number
+                  total_returned:
+                    type: integer
+                  remaining_chunks:
+                    type: integer
+                  auto_archived:
+                    type: boolean
+                  message:
+                    type: string
+        "401":
+          description: Session not warmed — user needs to open the extension first.
+        "410":
+          description: All context already retrieved and archived.
+
+  /status:
+    get:
+      operationId: getStatus
+      summary: Check retrieval progress for a session
+      description: >
+        Returns how many chunks have been retrieved vs total available.
+        Use this to decide whether more context needs to be fetched.
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Retrieval progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project:
+                    type: string
+                  total:
+                    type: integer
+                  retrieved:
+                    type: integer
+                  remaining:
+                    type: integer
+                  complete:
+                    type: boolean

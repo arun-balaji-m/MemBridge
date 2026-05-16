@@ -20,12 +20,14 @@ My full project context is stored in a MemoryBridge memory system.
 API Base: {api_base}
 Session Key: {key}
 
-Before answering anything about this project, you MUST retrieve context by calling these URLs directly:
+Before answering anything about this project, you MUST retrieve context by calling these endpoints:
 
 1. GET {api_base}/index?key={key}
    → Lists all available topics. Read them and decide which are relevant.
 
-2. GET {api_base}/query?question=<your relevant question>&key={key}&top_k=3
+2. POST {api_base}/query
+   Content-Type: application/json
+   Body: {{"key": "{key}", "question": "<your relevant question>", "top_k": 3}}
    → Returns the most relevant context chunks. Use them as your working memory.
 
 3. Answer using the retrieved chunks as context.
@@ -35,14 +37,9 @@ Before answering anything about this project, you MUST retrieve context by calli
 5. GET {api_base}/status?key={key}
    → Check retrieval progress at any time.
 
-Note: No authentication headers are needed — just call the URLs as plain GET requests.
+No authentication headers are needed.
 
-For the query step, use a POST request with a JSON body (more reliable than GET with URL params):
-  POST {api_base}/query
-  Content-Type: application/json
-  Body: {{"key": "{key}", "question": "<your question here>", "top_k": 3}}
-
-Start now: call GET /index?key={key} and summarize what project we are working on and where we left off.\
+Start now: call GET {api_base}/index?key={key} and summarize what project we are working on and where we left off.\
 """
 
 
