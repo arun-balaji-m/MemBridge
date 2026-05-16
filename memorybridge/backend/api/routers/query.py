@@ -9,8 +9,10 @@ with spaces and special characters in the question text.
 """
 
 import asyncio
+import logging
+from urllib.parse import unquote_plus
 from typing import Optional
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 from api.services.session_service import resolve_session
 from api.services.embedding_service import embed_text
@@ -18,6 +20,8 @@ from api.services.archive_service import run_archive
 from api.utils.vectorstore import get_db, search, mark_retrieved_bulk, get_counts, check_complete
 from api.models.response_models import QueryResponse, ChunkResult
 from api.state import app_state
+
+log = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -47,7 +51,11 @@ async def _run_query(key: str, question: str, top_k: int, token: Optional[str]) 
             },
         )
 
-    question_vector = await embed_text(app_state, question)
+    try:
+        question_vector = await embed_text(app_state, question)
+    except Exception as exc:
+        log.exception("Embedding failed for question=%r", question)
+        raise HTTPException(status_code=500, detail=f"Embedding failed: {exc}")
     loop = asyncio.get_event_loop()
 
     def _search_and_mark():
@@ -98,19 +106,49 @@ async def _run_query(key: str, question: str, top_k: int, token: Optional[str]) 
 
     return response
 
-# ── GET endpoint (backward compat) ───────────────────────────────────────────────
+# ── GET /query and GET /fetch — raw param parsing to survive LLM URL encoding ──
+# Uses Request directly so badly-encoded URLs don't trigger FastAPI 422.
 
-@router.get("/query", response_model=QueryResponse)
-async def query_memory_get(
-    key: str,
-    question: str,
-    top_k: int = 3,
-    authorization: Optional[str] = Header(None),
-):
+def _parse_get_params(request: Request):
+    """Manually extract key, question, top_k from raw query string."""
+    raw = str(request.url.query)  # raw undecoded query string
+    params = {}
+    for part in raw.split("&"):
+        if "=" in part:
+            k, _, v = part.partition("=")
+            params[unquote_plus(k)] = unquote_plus(v)
+        elif part:
+            params[unquote_plus(part)] = ""
+
+    key = params.get("key", "").strip()
+    question = params.get("question", params.get("q", "")).strip()
+    try:
+        top_k = int(params.get("top_k", "3"))
+    except ValueError:
+        top_k = 3
+
+    if not key:
+        raise HTTPException(status_code=422, detail="Missing required parameter: 'key'")
+    if not question:
+        raise HTTPException(status_code=422, detail="Missing required parameter: 'question' (or 'q')")
+
+    return key, question, top_k
+
+
+@router.get("/query")
+async def query_memory_get(request: Request, authorization: Optional[str] = Header(None)):
+    key, question, top_k = _parse_get_params(request)
     return await _run_query(key, question, top_k, _extract_token(authorization))
 
 
-# ── POST endpoint (preferred for LLM use) ──────────────────────────────────────────
+@router.get("/fetch")
+async def fetch_memory_get(request: Request, authorization: Optional[str] = Header(None)):
+    """Alias for GET /query — use ?q= as shorter param to avoid encoding issues."""
+    key, question, top_k = _parse_get_params(request)
+    return await _run_query(key, question, top_k, _extract_token(authorization))
+
+
+# ── POST endpoint (preferred for function-calling clients) ────────────────────
 
 @router.post("/query", response_model=QueryResponse)
 async def query_memory_post(

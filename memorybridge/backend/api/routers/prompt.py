@@ -22,16 +22,19 @@ Session Key: {key}
 
 Retrieve context before answering anything about this project:
 
-STEP 1 — List topics (GET, works everywhere):
+STEP 1 — List topics (plain GET, works everywhere):
   {api_base}/index?key={key}
 
 STEP 2 — Fetch relevant chunks. Use whichever method your environment supports:
 
-  Option A — GET (Claude, ChatGPT browsing, any browser):
-    {api_base}/query?key={key}&question=<url-encoded-question>&top_k=3
-    Example: {api_base}/query?key={key}&question=how+does+authentication+work&top_k=3
+  Option A — Short-param GET (best for Claude web_fetch):
+    {api_base}/fetch?key={key}&q=<your+question+here>
+    (replace spaces with +, e.g. how+does+authentication+work)
 
-  Option B — POST with JSON body (ChatGPT Custom GPT Actions, API clients):
+  Option B — Standard GET (alternative):
+    {api_base}/query?key={key}&question=<url-encoded-question>&top_k=3
+
+  Option C — POST with JSON body (ChatGPT Actions, API clients):
     POST {api_base}/query
     Content-Type: application/json
     {{"key": "{key}", "question": "<your question>", "top_k": 3}}
