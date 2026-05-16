@@ -117,13 +117,13 @@
       const id = `chunk_${String(chunkIndex + 1).padStart(3, "0")}`;
       const firstMsg = window[0];
 
-      // Title: first 8 words of first message
-      const titleWords = (firstMsg.content || "").split(/\s+/).slice(0, 8).join(" ");
+      // Title: first 15 words of first message (enough to capture full short questions)
+      const titleWords = (firstMsg.content || "").split(/\s+/).slice(0, 15).join(" ");
       const title = titleWords || id;
 
-      // Summary: first sentence of first message
+      // Summary: first sentence of first message, capped at 200 chars
       const firstSentence = (firstMsg.content || "").split(/[.!?]/)[0].trim();
-      const summary = firstSentence || title;
+      const summary = (firstSentence || title).slice(0, 200);
 
       // Detail: full concatenated text
       const detail = window.map((m) => `[${m.role}]: ${m.content}`).join("\n\n");
