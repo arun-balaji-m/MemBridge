@@ -6,6 +6,7 @@ auto-archives if all chunks have been retrieved.
 """
 
 import asyncio
+from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from api.services.session_service import resolve_session
 from api.services.embedding_service import embed_text
@@ -22,7 +23,7 @@ async def query_memory(
     key: str,
     question: str,
     top_k: int = 3,
-    authorization: str = Header(..., description="Bearer <google_access_token>"),
+    authorization: Optional[str] = Header(None, description="Bearer <google_access_token> (only needed first time)"),
 ):
     token = _extract_token(authorization)
 
@@ -100,7 +101,9 @@ async def query_memory(
     return response
 
 
-def _extract_token(authorization: str) -> str:
+def _extract_token(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
     if not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=401,

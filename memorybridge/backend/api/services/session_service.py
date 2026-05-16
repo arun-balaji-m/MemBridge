@@ -30,18 +30,43 @@ log = logging.getLogger(__name__)
 TMP_ROOT = "/tmp/memorybridge"
 
 
-async def resolve_session(key: str, access_token: str) -> _CacheEntry:
+async def resolve_session(key: str, access_token: str | None = None) -> _CacheEntry:
     """
-    Given a session key and a valid Drive access token:
-      1. Validate the token (fast, cached)
-      2. Return cached entry if present
-      3. Download + unpack from Drive on cache miss
-      4. Populate and return cache entry
+    Given a session key and an optional Drive access token:
+      - If session is cached: return it immediately (no token needed).
+        This is the normal path for LLM calls — the session was pre-warmed
+        when the user clicked 'Get LLM Prompt' in the extension.
+      - If not cached and token provided: download from Drive, unpack, cache.
+      - If not cached and no token: return 401 with instructions.
 
     Raises HTTPException on any failure so routers stay clean.
     """
-    # ── 1. Validate token ──────────────────────────────────────────────────
     loop = asyncio.get_event_loop()
+
+    # ── 1. Check cache first (works without a token) ───────────────────────
+    entry = cache_get(key)
+    if entry is not None:
+        if access_token:
+            cache_update_token(key, access_token)
+        log.debug("Cache HIT key=%s", key)
+        return entry
+
+    # ── 2. Cache miss — need a token to download from Drive ────────────────
+    if not access_token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "session_not_initialized",
+                "message": (
+                    f"Session '{key}' is not loaded. "
+                    "Open the MemoryBridge Chrome extension, find this session key, "
+                    "and click 'Get LLM Prompt' to initialize the session. "
+                    "Then paste the prompt again."
+                ),
+            },
+        )
+
+    # ── 3. Validate token before hitting Drive ─────────────────────────────
     token_ok = await loop.run_in_executor(None, validate_token, access_token)
     if not token_ok:
         raise HTTPException(
@@ -54,13 +79,6 @@ async def resolve_session(key: str, access_token: str) -> _CacheEntry:
                 ),
             },
         )
-
-    # ── 2. Check cache ─────────────────────────────────────────────────────
-    entry = cache_get(key)
-    if entry is not None:
-        cache_update_token(key, access_token)
-        log.debug("Cache HIT key=%s", key)
-        return entry
 
     log.info("Cache MISS key=%s — downloading from Drive", key)
 

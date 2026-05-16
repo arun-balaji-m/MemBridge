@@ -6,6 +6,7 @@ this API to restore project context.
 """
 
 import os
+from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from api.services.session_service import resolve_session
 from api.models.response_models import PromptResponse
@@ -14,24 +15,27 @@ router = APIRouter()
 
 PROMPT_TEMPLATE = """\
 I'm continuing work on "{project}".
-My full project context is stored externally in a memory system.
+My full project context is stored in a MemoryBridge memory system.
 
 API Base: {api_base}
 Session Key: {key}
 
-Before answering anything about this project, you MUST:
+Before answering anything about this project, you MUST retrieve context by calling these URLs directly:
 
-1. Call GET {api_base}/index?key={key}
-   → Read all available topics and decide which are relevant to the current question.
+1. GET {api_base}/index?key={key}
+   → Lists all available topics. Read them and decide which are relevant.
 
-2. Call GET {api_base}/query?question=<your relevant question>&key={key}&top_k=3
-   → This returns the most relevant context chunks. Use them as your working memory.
+2. GET {api_base}/query?question=<your relevant question>&key={key}&top_k=3
+   → Returns the most relevant context chunks. Use them as your working memory.
 
 3. Answer using the retrieved chunks as context.
 
-4. Repeat steps 2–3 as the conversation continues and new topics arise.
+4. Repeat step 2 as new topics arise in the conversation.
 
-5. Call GET {api_base}/status?key={key} at any time to see retrieval progress.
+5. GET {api_base}/status?key={key}
+   → Check retrieval progress at any time.
+
+Note: No authentication headers are needed — just call the URLs as plain GET requests.
 
 Start now: call /index and summarize what project we are working on and where we left off.\
 """
@@ -40,7 +44,7 @@ Start now: call /index and summarize what project we are working on and where we
 @router.get("/prompt", response_model=PromptResponse)
 async def get_prompt(
     key: str,
-    authorization: str = Header(..., description="Bearer <google_access_token>"),
+    authorization: Optional[str] = Header(None, description="Bearer <google_access_token>"),
 ):
     token = _extract_token(authorization)
     entry = await resolve_session(key, token)
@@ -61,7 +65,9 @@ async def get_prompt(
     )
 
 
-def _extract_token(authorization: str) -> str:
+def _extract_token(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
     if not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=401,

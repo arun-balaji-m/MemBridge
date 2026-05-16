@@ -5,6 +5,7 @@ Returns retrieval progress.
 """
 
 import asyncio
+from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from api.services.session_service import resolve_session
 from api.utils.vectorstore import get_db, get_counts
@@ -16,7 +17,7 @@ router = APIRouter()
 @router.get("/status", response_model=StatusResponse)
 async def get_status(
     key: str,
-    authorization: str = Header(..., description="Bearer <google_access_token>"),
+    authorization: Optional[str] = Header(None, description="Bearer <google_access_token> (only needed first time)"),
 ):
     token = _extract_token(authorization)
     entry = await resolve_session(key, token)
@@ -49,7 +50,9 @@ async def get_status(
     )
 
 
-def _extract_token(authorization: str) -> str:
+def _extract_token(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
     if not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=401,
