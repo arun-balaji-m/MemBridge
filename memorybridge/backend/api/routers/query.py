@@ -138,14 +138,32 @@ def _parse_get_params(request: Request):
 @router.get("/query")
 async def query_memory_get(request: Request, authorization: Optional[str] = Header(None)):
     key, question, top_k = _parse_get_params(request)
-    return await _run_query(key, question, top_k, _extract_token(authorization))
+    try:
+        return await _run_query(key, question, top_k, _extract_token(authorization))
+    except HTTPException as exc:
+        if exc.status_code in (401, 403):
+            detail = exc.detail if isinstance(exc.detail, str) else exc.detail.get("message", str(exc.detail))
+            return QueryResponse(
+                chunks=[], total_returned=0, remaining_chunks=0,
+                message=f"⚠️ Session not ready: {detail}",
+            )
+        raise
 
 
 @router.get("/fetch")
 async def fetch_memory_get(request: Request, authorization: Optional[str] = Header(None)):
     """Alias for GET /query — use ?q= as shorter param to avoid encoding issues."""
     key, question, top_k = _parse_get_params(request)
-    return await _run_query(key, question, top_k, _extract_token(authorization))
+    try:
+        return await _run_query(key, question, top_k, _extract_token(authorization))
+    except HTTPException as exc:
+        if exc.status_code in (401, 403):
+            detail = exc.detail if isinstance(exc.detail, str) else exc.detail.get("message", str(exc.detail))
+            return QueryResponse(
+                chunks=[], total_returned=0, remaining_chunks=0,
+                message=f"⚠️ Session not ready: {detail}",
+            )
+        raise
 
 
 # ── POST endpoint (preferred for function-calling clients) ────────────────────

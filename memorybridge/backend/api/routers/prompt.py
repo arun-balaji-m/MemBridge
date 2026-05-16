@@ -25,7 +25,7 @@ Retrieve context before answering anything about this project:
 STEP 1 — List topics (plain GET, works everywhere):
   {api_base}/index?key={key}
 
-STEP 2 — Fetch relevant chunks. Use whichever method your environment supports:
+STEP 2 — Fetch relevant chunks using the context you retrieved in Step 1. Use whichever method your environment supports:
 
   Option A — Short-param GET (best for Claude web_fetch):
     {api_base}/fetch?key={key}&q=<your+question+here>
