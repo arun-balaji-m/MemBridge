@@ -98,60 +98,6 @@ async def _run_query(key: str, question: str, top_k: int, token: Optional[str]) 
 
     return response
 
-# ── /read  — plain-text dump for LLM browsing tools ─────────────────────────
-
-@router.get("/read", response_class=PlainTextResponse)
-async def read_memory(key: str, authorization: Optional[str] = Header(None)):
-    """
-    Return ALL project context as human-readable plain text.
-    Designed for LLM browsing tools (web_fetch / browse) that cannot send
-    POST bodies or parse JSON — one URL, zero auth, full context.
-    """
-    token = _extract_token(authorization)
-    try:
-        entry = await resolve_session(key, token)
-    except HTTPException as exc:
-        # Return friendly plain text so browsing tools show a readable message
-        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
-        return PlainTextResponse(
-            f"[MemoryBridge] Could not load session: {detail}\n"
-            f"Open the MemoryBridge extension and click 'Get LLM Prompt' to warm the session first.",
-            status_code=exc.status_code,
-        )
-
-    loop = asyncio.get_event_loop()
-
-    def _fetch_all():
-        with entry.write_lock:
-            with get_db(entry.db_path) as conn:
-                chunks = get_all_chunks(conn)
-                counts = get_counts(conn)
-        return chunks, counts
-
-    chunks, counts = await loop.run_in_executor(None, _fetch_all)
-
-    project = entry.metadata.get("project_name", key)
-    lines = [
-        f"# MemoryBridge Context — {project}",
-        f"Session key: {key}",
-        f"Chunks: {counts['retrieved']} retrieved / {counts['total']} total",
-        "",
-    ]
-
-    for i, c in enumerate(chunks, 1):
-        lines.append(f"--- Chunk {i}: {c['title']} [{c['category']}] ---")
-        if c["summary"]:
-            lines.append(f"Summary: {c['summary']}")
-        if c["detail"]:
-            lines.append(f"Detail: {c['detail']}")
-        if c["code"]:
-            lines.append(f"Code:\n{c['code']}")
-        if c["tags"]:
-            lines.append(f"Tags: {', '.join(c['tags'])}")
-        lines.append("")
-
-    return PlainTextResponse("\n".join(lines))
-
 # ── GET endpoint (backward compat) ───────────────────────────────────────────────
 
 @router.get("/query", response_model=QueryResponse)
