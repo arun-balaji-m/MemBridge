@@ -25,6 +25,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -50,6 +51,16 @@ async def lifespan(app: FastAPI):
     log.info("MemoryBridge API starting…")
 
     app_state["start_time"] = time.monotonic()
+
+    # Load sentence-transformers model into app_state so embed_text() can use it
+    log.info("Loading embedding model all-MiniLM-L6-v2…")
+    loop = asyncio.get_event_loop()
+    model = await loop.run_in_executor(
+        None,
+        lambda: SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2"),
+    )
+    app_state["model"] = model
+    log.info("Embedding model loaded.")
 
     # Start cache eviction background task
     ttl = float(os.getenv("CACHE_TTL_SECONDS", "3600"))
@@ -107,14 +118,11 @@ app.include_router(prompt.router, tags=["LLM"])
 
 @app.get("/health", tags=["System"])
 async def health():
-    uptime = time.monotonic() - app_state.get(
-        "start_time",
-        time.monotonic()
-    )
+    uptime = time.monotonic() - app_state.get("start_time", time.monotonic())
 
     return {
         "status": "ok",
-        "embedder_proxy": "active",
+        "model_loaded": app_state.get("model") is not None,
         "uptime_seconds": round(uptime, 1),
     }
 
