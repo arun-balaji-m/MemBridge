@@ -37,7 +37,12 @@ Before answering anything about this project, you MUST retrieve context by calli
 
 Note: No authentication headers are needed — just call the URLs as plain GET requests.
 
-Start now: call /index and summarize what project we are working on and where we left off.\
+For the query step, use a POST request with a JSON body (more reliable than GET with URL params):
+  POST {api_base}/query
+  Content-Type: application/json
+  Body: {{"key": "{key}", "question": "<your question here>", "top_k": 3}}
+
+Start now: call GET /index?key={key} and summarize what project we are working on and where we left off.\
 """
 
 
