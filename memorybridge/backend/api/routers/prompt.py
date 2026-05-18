@@ -17,32 +17,25 @@ PROMPT_TEMPLATE = """\
 I'm continuing work on "{project}".
 My full project context is stored in a MemoryBridge memory system.
 
-API Base: {api_base}
 Session Key: {key}
 
-Retrieve context before answering anything about this project:
+Follow these steps before answering anything about this project:
 
-STEP 1 — List topics (plain GET, works everywhere):
+STEP 1 — Call this URL to get the topic list:
   {api_base}/index?key={key}
 
-STEP 2 — Fetch relevant chunks using the context you retrieved in Step 1. Use whichever method your environment supports:
+  The response contains a "topics" array. Each topic has a "fetch_url" field
+  which is a ready-to-use URL — no modification needed.
 
-  Option A — Short-param GET (best for Claude web_fetch):
-    {api_base}/fetch?key={key}&q=<your+question+here>
-    (replace spaces with +, e.g. how+does+authentication+work)
-
-  Option B — Standard GET (alternative):
-    {api_base}/query?key={key}&question=<url-encoded-question>&top_k=3
-
-  Option C — POST with JSON body (ChatGPT Actions, API clients):
-    POST {api_base}/query
-    Content-Type: application/json
-    {{"key": "{key}", "question": "<your question>", "top_k": 3}}
+STEP 2 — For each relevant topic, call its "fetch_url" exactly as given.
+  Do NOT modify or reconstruct the URL — use it exactly as returned in Step 1.
+  Just GET that URL directly. It returns the full context chunk.
 
 STEP 3 — Answer using the retrieved chunks.
-STEP 4 — Repeat Step 2 as new topics arise.
+STEP 4 — Repeat Step 2 for new topics as they arise in conversation.
 
-No authentication needed for any request.
+No authentication needed. Start now with Step 1.\
+"""
 Start now with Step 1 and summarize the project and where we left off.\
 """
 

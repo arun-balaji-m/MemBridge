@@ -24,6 +24,7 @@ class TopicItem(BaseModel):
     title: str
     category: str
     retrieved: bool
+    fetch_url: Optional[str] = None  # ready-to-use URL — call this to get chunk content
 
 
 class IndexResponse(BaseModel):

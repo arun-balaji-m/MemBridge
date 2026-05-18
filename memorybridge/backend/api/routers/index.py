@@ -2,9 +2,12 @@
 routers/index.py — MemoryBridge Phase 2
 GET /index?key=<session_key>
 Returns full topic index with retrieved/remaining counts.
+Each topic includes a ready-to-use fetch_url so LLMs call it directly.
 """
 
 import asyncio
+import os
+from urllib.parse import quote_plus
 from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from api.services.session_service import resolve_session
@@ -32,12 +35,15 @@ async def get_index(
 
     summaries, counts = await loop.run_in_executor(None, _read)
 
+    api_base = os.getenv("API_BASE_URL", "https://membridge-production.up.railway.app").rstrip("/")
+
     topics = [
         TopicItem(
             id=s["id"],
             title=s["title"],
             category=s["category"],
             retrieved=s["retrieved"],
+            fetch_url=f"{api_base}/fetch?key={key}&q={quote_plus(s['title'])}",
         )
         for s in summaries
     ]
