@@ -34,9 +34,7 @@ STEP 2 — For each relevant topic, call its "fetch_url" exactly as given.
 STEP 3 — Answer using the retrieved chunks.
 STEP 4 — Repeat Step 2 for new topics as they arise in conversation.
 
-No authentication needed. Start now with Step 1.\
-"""
-Start now with Step 1 and summarize the project and where we left off.\
+No authentication needed. Start now with Step 1.
 """
 
 
