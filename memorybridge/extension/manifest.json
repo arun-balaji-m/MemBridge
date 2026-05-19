@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "MemoryBridge",
+  "name": "MemBridge",
   "version": "1.0.0",
   "description": "Extract chat conversations from Claude.ai and ChatGPT, package memories, and upload to Google Drive.",
 
@@ -32,18 +32,18 @@
 
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "MemoryBridge",
+    "default_title": "MemBridge",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/memicon16.png",
+      "48": "icons/memicon48.png",
+      "128": "icons/memicon128.png"
     }
   },
 
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/memicon16.png",
+    "48": "icons/memicon48.png",
+    "128": "icons/memicon128.png"
   },
 
   "content_scripts": [
