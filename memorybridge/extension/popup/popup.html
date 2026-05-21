@@ -7,98 +7,126 @@
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <span class="logo-icon">▌▌</span>
-      <span class="logo-text">MemBridge</span>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="../icons/memicon48.png" class="brand-logo" alt="MemBridge" />
+      <span class="brand-name">MemBridge</span>
     </div>
-    <p class="tagline">AI Memory Vault</p>
+    <button class="btn-settings" title="Settings" aria-label="Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </header>
 
-  <!-- Input section -->
-  <section class="input-section">
-    <label for="chat-url">Chat URL</label>
-    <div class="url-row">
-      <input
-        type="url"
-        id="chat-url"
-        placeholder="https://claude.ai/chat/... or https://chat.openai.com/..."
-        autocomplete="off"
-        spellcheck="false"
-      />
-    </div>
-    <button id="extract-btn" class="btn-primary">Extract Memory</button>
-  </section>
-
-  <!-- Progress section (hidden until extraction starts) -->
-  <section id="progress-section" class="hidden">
-    <div class="steps">
-      <div class="step" id="step-1" data-step="1">
-        <span class="step-icon"></span>
-        <span class="step-label">Scraping chat…</span>
+  <!-- ── Capture Memory card ─────────────────────────────────────────────── -->
+  <section class="card">
+    <div class="card-body">
+      <h2 class="card-title">Capture Memory</h2>
+      <p class="card-desc">Save your AI conversation context so you can continue seamlessly on any LLM.</p>
+      <div class="field-group">
+        <label for="chat-url">Chat URL</label>
+        <input
+          type="url"
+          id="chat-url"
+          placeholder="https://claude.ai/chat/… or https://chatgpt.com/…"
+          autocomplete="off"
+          spellcheck="false"
+        />
       </div>
-      <div class="step" id="step-2" data-step="2">
-        <span class="step-icon"></span>
-        <span class="step-label">Classifying chunks…</span>
-      </div>
-      <div class="step" id="step-3" data-step="3">
-        <span class="step-icon"></span>
-        <span class="step-label">Generating embeddings…</span>
-      </div>
-      <div class="step" id="step-4" data-step="4">
-        <span class="step-icon"></span>
-        <span class="step-label">Creating memory package…</span>
-      </div>
-      <div class="step" id="step-5" data-step="5">
-        <span class="step-icon"></span>
-        <span class="step-label">Uploading to Google Drive…</span>
-      </div>
-      <div class="step" id="step-6" data-step="6">
-        <span class="step-icon"></span>
-        <span class="step-label">Done!</span>
-      </div>
+      <button id="extract-btn" class="btn-gradient">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Extract Memory
+      </button>
     </div>
   </section>
 
-  <!-- Result section (hidden until done) -->
-  <section id="result-section" class="hidden">
-    <div class="result-card">
-      <p class="result-label">Your session key</p>
-      <div class="key-row">
+  <!-- ── Progress card (hidden) ─────────────────────────────────────────── -->
+  <section id="progress-section" class="card hidden">
+    <div class="card-body">
+      <h2 class="card-title">Capturing…</h2>
+      <div class="steps">
+        <div class="step" id="step-1" data-step="1">
+          <span class="step-icon"></span>
+          <span class="step-label">Scraping chat…</span>
+        </div>
+        <div class="step" id="step-2" data-step="2">
+          <span class="step-icon"></span>
+          <span class="step-label">Classifying chunks…</span>
+        </div>
+        <div class="step" id="step-3" data-step="3">
+          <span class="step-icon"></span>
+          <span class="step-label">Generating embeddings…</span>
+        </div>
+        <div class="step" id="step-4" data-step="4">
+          <span class="step-icon"></span>
+          <span class="step-label">Creating memory package…</span>
+        </div>
+        <div class="step" id="step-5" data-step="5">
+          <span class="step-icon"></span>
+          <span class="step-label">Uploading to Google Drive…</span>
+        </div>
+        <div class="step" id="step-6" data-step="6">
+          <span class="step-icon"></span>
+          <span class="step-label">Done!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Result card (hidden) ───────────────────────────────────────────── -->
+  <section id="result-section" class="card card-success hidden">
+    <div class="card-body">
+      <h2 class="card-title">Memory Saved ✓</h2>
+      <p class="card-desc">Your session key — keep this safe to resume from any LLM.</p>
+      <div class="key-box">
         <span id="session-key" class="session-key">—</span>
-        <button id="copy-btn" class="btn-copy" title="Copy key">⎘ Copy</button>
+        <button id="copy-btn" class="btn-icon-copy" title="Copy">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
       </div>
-      <p class="result-hint">Save this key to retrieve your memory later.</p>
-      <button id="prompt-btn" class="btn-prompt">Get LLM Prompt</button>
+      <button id="prompt-btn" class="btn-gradient btn-outline-gradient">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Get LLM Prompt
+      </button>
     </div>
   </section>
 
-  <!-- Prompt modal (hidden until fetched) -->
-  <section id="prompt-section" class="hidden">
-    <div class="prompt-card">
-      <div class="prompt-header">
-        <span>LLM Prompt</span>
-        <button id="copy-prompt-btn" class="btn-copy">⎘ Copy</button>
+  <!-- ── Prompt card (hidden) ───────────────────────────────────────────── -->
+  <section id="prompt-section" class="card hidden">
+    <div class="card-body">
+      <div class="card-header-row">
+        <h2 class="card-title" style="margin-bottom:0">LLM Prompt</h2>
+        <button id="copy-prompt-btn" class="btn-icon-copy">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
       </div>
       <textarea id="prompt-text" class="prompt-text" readonly></textarea>
     </div>
   </section>
 
-  <!-- Error banner (hidden by default) -->
+  <!-- ── Error banner ───────────────────────────────────────────────────── -->
   <div id="error-banner" class="error-banner hidden">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span id="error-message"></span>
   </div>
 
-  <!-- History section -->
-  <section id="history-section">
-    <h3 class="history-title">Previous Sessions</h3>
-    <ul id="history-list" class="history-list">
-      <li class="history-empty">No sessions yet.</li>
-    </ul>
+  <!-- ── Previous Sessions card ─────────────────────────────────────────── -->
+  <section class="card">
+    <div class="card-body">
+      <h2 class="card-title">Previous Sessions</h2>
+      <p class="card-desc">Resume a captured conversation on a different AI provider.</p>
+      <ul id="history-list" class="history-list">
+        <li class="history-empty">No sessions captured yet.</li>
+      </ul>
+    </div>
   </section>
 
-  <!-- Session status toast -->
+  <!-- ── Toast ──────────────────────────────────────────────────────────── -->
   <div id="session-toast" class="session-toast hidden"></div>
 
   <script src="popup.js"></script>
